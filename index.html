@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101a2b">
+<title>MECHANISM 3D | Thư viện mô phỏng Nguyên lý máy</title>
+<style>
+:root{--bg:#0b1220;--panel:#131f32;--panel2:#192941;--line:#2a3e59;--txt:#edf4ff;--muted:#a8bad1;--blue:#54b5f5;--gold:#f0a64a;--teal:#45b7a5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:Inter,Arial,sans-serif}button,input{font:inherit}
+header{padding:22px max(20px,calc((100vw - 1440px)/2));background:linear-gradient(115deg,#132d4b,#101a2b 68%);border-bottom:1px solid var(--line)}
+.brand{font-size:12px;letter-spacing:2px;color:#8bcfff;font-weight:800}.hero{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}.hero h1{font-size:clamp(25px,4vw,42px);margin:10px 0}.hero p{color:#bdcce0;max-width:700px;line-height:1.6;margin:0}.tag{border:1px solid #426486;border-radius:30px;padding:8px 13px;color:#c6e5ff;font-size:12px}
+main{max-width:1440px;margin:auto;padding:22px 18px 40px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:10px 15px;border-radius:9px;cursor:pointer}.tab.active{background:#17466b;border-color:#398cc5;color:white}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px}.stage{min-width:0}.viewport{height:min(67vh,690px);min-height:430px;position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#263b55,#0d1727 72%)}canvas{display:block;width:100%;height:100%}.viewlabel{position:absolute;top:13px;left:14px;padding:8px 11px;background:#081321cc;border:1px solid #334960;border-radius:8px;font-size:12px;color:#d8e8f8}.hint{position:absolute;bottom:12px;left:14px;color:#c4d2e3;background:#081321bd;border-radius:7px;padding:7px 10px;font-size:11px;pointer-events:none}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;height:max-content}.side h2{font-size:17px;margin:0 0 15px}.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{background:#223650;color:white;border:1px solid #3b5675;border-radius:8px;padding:10px;cursor:pointer}.btn.main{background:#1377b8;border-color:#258dce}.btn:hover{filter:brightness(1.13)}.control{margin:17px 0}.control label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin-bottom:8px}.control output{color:white;font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--blue)}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}.stat{background:#0d1828;border:1px solid #293c55;padding:10px;border-radius:9px}.stat small{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}.stat strong{font-size:16px;font-variant-numeric:tabular-nums}.legend{display:grid;gap:8px;margin-top:16px;color:var(--muted);font-size:12px}.swatch{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}
+.info{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px}.card h3{margin:0 0 10px;font-size:16px}.card p,.card li{color:var(--muted);font-size:13px;line-height:1.65}.equation{background:#0c1727;border:1px solid #293d57;border-radius:8px;padding:12px;font-family:Georgia,serif;font-size:17px;color:#e5f2ff;line-height:1.8}.footer{color:#71849d;text-align:center;font-size:11px;padding:22px}
+@media(max-width:900px){.workspace{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.side h2,.btnrow,.stats,.legend{grid-column:1/-1}.info{grid-template-columns:1fr}}
+@media(max-width:560px){main{padding:14px 10px 28px}.viewport{height:52vh;min-height:350px}.side{display:block}.hero h1{font-size:27px}}
+</style>
+</head>
+<body>
+<header><div class="hero"><div><div class="brand">MECHANISM 3D · ENGINEERING LEARNING LAB</div><h1>Thư viện mô phỏng Nguyên lý máy</h1><p>Học nguyên lý hoạt động bằng mô hình 3D tương tác. Quan sát chuyển động, điều chỉnh thông số và kết nối hình học cơ cấu với các đại lượng động học.</p></div><div class="tag">3D INTERACTIVE SIMULATOR</div></div></header>
+<main>
+<nav class="tabs" aria-label="Danh mục cơ cấu"><button class="tab active" data-kind="slider">01 · Tay quay – con trượt</button><button class="tab" data-kind="fourbar" title="Bản xem trước danh mục">02 · Bốn khâu bản lề (sắp có)</button></nav>
+<div class="workspace">
+<section class="stage"><div class="viewport" id="viewport"><canvas id="scene"></canvas><div class="viewlabel">MÔ HÌNH 01 / SLIDER-CRANK</div><div class="hint">Kéo để xoay góc nhìn · Cuộn để phóng to/thu nhỏ · Chạm và kéo trên điện thoại</div></div></section>
+<aside class="side">
+<h2>Điều khiển mô phỏng</h2>
+<div class="btnrow"><button class="btn main" id="play">Ⅱ Tạm dừng</button><button class="btn" id="reset">↺ Đặt lại</button><button class="btn" id="reverse">⇄ Đổi chiều quay</button><button class="btn" id="home">⌖ Góc nhìn chuẩn</button></div>
+<div class="control"><label for="rpm">Tốc độ quay <output id="rpmOut">30 vòng/phút</output></label><input id="rpm" type="range" min="5" max="120" step="5" value="30"></div>
+<div class="control"><label for="theta">Góc tay quay θ <output id="thetaOut">35°</output></label><input id="theta" type="range" min="0" max="360" value="35"></div>
+<div class="control"><label for="radius">Bán kính tay quay r <output id="rOut">1.00 m</output></label><input id="radius" type="range" min=".5" max="1.5" step=".05" value="1"></div>
+<div class="control"><label for="length">Chiều dài thanh truyền l <output id="lOut">3.00 m</output></label><input id="length" type="range" min="2" max="4.5" step=".1" value="3"></div>
+<div class="stats"><div class="stat"><small>Vị trí con trượt x</small><strong id="xOut">—</strong></div><div class="stat"><small>Hành trình S = 2r</small><strong id="sOut">2.00 m</strong></div><div class="stat"><small>Vận tốc góc ω</small><strong id="wOut">3.14 rad/s</strong></div><div class="stat"><small>Góc thanh truyền β</small><strong id="betaOut">—</strong></div></div>
+<div class="legend"><div><i class="swatch" style="background:#efa448"></i>Khâu 2 – Tay quay</div><div><i class="swatch" style="background:#45b7a5"></i>Khâu 3 – Thanh truyền</div><div><i class="swatch" style="background:#4f9fe0"></i>Con trượt</div><div><i class="swatch" style="background:#b7c6d8"></i>Giá và ray dẫn hướng</div></div>
+</aside></div>
+<div class="info">
+<article class="card"><h3>Nguyên lý hoạt động</h3><p>Tay quay (khâu 2) quay quanh khớp cố định O. Chốt A nối với thanh truyền (khâu 3), truyền chuyển động đến con trượt B. Con trượt bị ràng buộc bởi ray dẫn hướng nên chỉ chuyển động tịnh tiến qua lại. Cơ cấu biến đổi chuyển động quay liên tục thành chuyển động tịnh tiến khứ hồi.</p><ul><li>Hai vị trí biên: tay quay và thanh truyền nằm trên cùng một đường thẳng.</li><li>Hành trình con trượt lý tưởng bằng hai lần bán kính tay quay.</li><li>Với tốc độ quay đều, vận tốc con trượt thay đổi theo góc quay và không đều trong một chu kỳ.</li></ul></article>
+<article class="card"><h3>Quan hệ hình học – động học</h3><div class="equation">x = r cos θ + √(l² − r² sin² θ)<br>sin β = (r/l) sin θ<br>S = 2r</div><p>Trong đó θ là góc tay quay đo từ phương chuyển động của con trượt; β là góc lệch của thanh truyền so với phương trượt; r là bán kính tay quay và l là chiều dài thanh truyền.</p></article>
+</div>
+<div class="footer">MECHANISM 3D · Mô hình phục vụ học tập và minh họa nguyên lý máy · Cần kết nối Internet để tải thư viện 3D</div>
+</main>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+const canvas=document.querySelector('#scene'), viewport=document.querySelector('#viewport');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x111d2e);
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);camera.position.set(2.5,5.1,8.5);
+const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(1.35,.35,0);orbit.enableDamping=true;orbit.maxPolarAngle=Math.PI*.49;
+scene.add(new THREE.HemisphereLight(0xdcecff,0x35445c,2));
+const sun=new THREE.DirectionalLight(0xffffff,2.1);sun.position.set(2,7,5);sun.castShadow=true;scene.add(sun);
+const fill=new THREE.DirectionalLight(0x6baeff,.75);fill.position.set(-5,3,-4);scene.add(fill);
+const material=(c,m=.25,r=.4)=>new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+const steel=material(0xaebdce,.65,.3),dark=material(0x34475f,.5,.4),orange=material(0xeaa044,.4,.3),teal=material(0x45b7a5,.35,.3),blue=material(0x398ed4,.4,.28),gold=material(0xf5d28b,.55,.25);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,18),material(0x172538,.1,.8));floor.rotation.x=-Math.PI/2;floor.position.y=-.48;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(18,36,0x40536b,0x293b52);grid.position.y=-.465;scene.add(grid);
+function block(w,h,d,mat,x,y,z){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
+function sphere(rad,mat){let o=new THREE.Mesh(new THREE.SphereGeometry(rad,24,16),mat);o.castShadow=true;scene.add(o);return o}
+function bar(rad,mat){let o=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,1,24),mat);o.castShadow=true;scene.add(o);return o}
+function placeBar(mesh,a,b){const d=new THREE.Vector3().subVectors(b,a);mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.scale.set(1,d.length(),1);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())}
+const O=new THREE.Vector3(0,.65,0);
+block(.48,1.25,.52,dark,0,.08,0);
+let bearing=new THREE.Mesh(new THREE.CylinderGeometry(.34,.34,.6,40),steel);bearing.rotation.x=Math.PI/2;bearing.position.copy(O);bearing.castShadow=true;scene.add(bearing);
+block(7,.15,.58,steel,2.35,0,0);block(7,.055,.66,material(0x74889f),2.35,.105,0);
+block(.16,.42,.72,dark,2.35,-.27,0);
+const crank=bar(.105,orange),rod=bar(.085,teal),pinA=sphere(.145,gold),pinB=sphere(.14,gold);
+const slider=new THREE.Group();scene.add(slider);
+const body=new THREE.Mesh(new THREE.BoxGeometry(.88,.55,.7),blue);body.castShadow=true;slider.add(body);
+const cap=new THREE.Mesh(new THREE.BoxGeometry(.55,.1,.74),steel);cap.position.y=.33;cap.castShadow=true;slider.add(cap);
+const traceMat=new THREE.LineBasicMaterial({color:0x79ceff});let trace=[];
+const traceLine=new THREE.Line(new THREE.BufferGeometry(),traceMat);scene.add(traceLine);
+const state={theta:35*Math.PI/180,r:1,l:3,rpm:30,run:true,dir:1};
+const el=id=>document.getElementById(id);
+function update(){
+ const t=state.theta,r=state.r,l=state.l;
+ const A=new THREE.Vector3(r*Math.cos(t),O.y+r*Math.sin(t),0);
+ const dx=Math.sqrt(Math.max(.0001,l*l-r*r*Math.sin(t)**2));
+ const B=new THREE.Vector3(r*Math.cos(t)+dx,O.y,0);
+ placeBar(crank,O,A);placeBar(rod,A,B);pinA.position.copy(A);pinB.position.copy(B);slider.position.set(B.x,O.y-.02,0);
+ const beta=Math.asin(Math.max(-1,Math.min(1,r/l*Math.sin(t))));
+ el('thetaOut').textContent=Math.round(t*180/Math.PI)+'°';el('rpmOut').textContent=state.rpm+' vòng/phút';
+ el('rOut').textContent=r.toFixed(2)+' m';el('lOut').textContent=l.toFixed(2)+' m';
+ el('xOut').textContent=(B.x).toFixed(3)+' m';el('sOut').textContent=(2*r).toFixed(2)+' m';
+ el('wOut').textContent=(state.rpm*2*Math.PI/60).toFixed(2)+' rad/s';el('betaOut').textContent=(beta*180/Math.PI).toFixed(1)+'°';
+ el('theta').value=Math.round(t*180/Math.PI);el('rpm').value=state.rpm;el('radius').value=r;el('length').value=l;
+}
+function resize(){const w=viewport.clientWidth,h=viewport.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}
+new ResizeObserver(resize).observe(viewport);resize();update();
+let prev=performance.now();
+function frame(now){requestAnimationFrame(frame);let dt=Math.min((now-prev)/1000,.05);prev=now;if(state.run){state.theta=(state.theta+state.dir*state.rpm*2*Math.PI/60*dt+Math.PI*8)%(Math.PI*2);let t=state.theta;let x=state.r*Math.cos(t)+Math.sqrt(Math.max(.0001,state.l**2-state.r**2*Math.sin(t)**2));trace.push(new THREE.Vector3(x,.18,.43));if(trace.length>160)trace.shift();traceLine.geometry.dispose();traceLine.geometry=new THREE.BufferGeometry().setFromPoints(trace);update()}orbit.update();renderer.render(scene,camera)}
+requestAnimationFrame(frame);
+el('play').onclick=()=>{state.run=!state.run;el('play').textContent=state.run?'Ⅱ Tạm dừng':'▶ Tiếp tục'};
+el('reset').onclick=()=>{Object.assign(state,{theta:0,r:1,l:3,rpm:30,dir:1,run:true});trace=[];traceLine.geometry.dispose();traceLine.geometry=new THREE.BufferGeometry();el('play').textContent='Ⅱ Tạm dừng';update()};
+el('reverse').onclick=()=>{state.dir*=-1};
+el('home').onclick=()=>{camera.position.set(2.5,5.1,8.5);orbit.target.set(1.35,.35,0);orbit.update()};
+el('rpm').oninput=e=>{state.rpm=+e.target.value;update()};
+el('theta').oninput=e=>{state.theta=+e.target.value*Math.PI/180;trace=[];update()};
+el('radius').oninput=e=>{state.r=+e.target.value;if(state.l<=state.r)state.l=state.r+.5;trace=[];update()};
+el('length').oninput=e=>{state.l=Math.max(+e.target.value,state.r+.1);trace=[];update()};
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.kind==='fourbar'){alert('Cơ cấu bốn khâu bản lề sẽ được bổ sung ở phiên bản tiếp theo. Hiện tại mô hình tay quay – con trượt đang hoạt động.');return}document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b))}));
+</script>
+</body></html>
